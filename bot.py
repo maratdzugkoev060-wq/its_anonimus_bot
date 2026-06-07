@@ -6,7 +6,7 @@ from aiogram.filters import Command
 import database as db
 
 # Читаем токен из переменной окружения (БЕЗОПАСНО!)
-BOT_TOKEN = os.environ['BOT_TOKEN']
+BOT_TOKEN = os.environ.get('BOT_TOKEN', '8630055474:AAFESgsKtvMCK_3iQiAi63ja3_nC4kaAL98')
 
 bot = Bot(token=BOT_TOKEN)
 dp = Dispatcher()
