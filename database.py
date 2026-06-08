@@ -4,11 +4,11 @@ DB_NAME = "anon_bot.db"
 
 
 def init_db():
-    """Создаёт таблицы, если их нет"""
+    """Создаёт таблицы при первом запуске"""
     conn = sqlite3.connect(DB_NAME)
     cur = conn.cursor()
 
-    # Таблица для связи ссылка -> владелец бота
+    # Таблица для хранения ссылок и владельцев
     cur.execute("""
                 CREATE TABLE IF NOT EXISTS links
                 (
@@ -23,7 +23,7 @@ def init_db():
                 )
                 """)
 
-    # Таблица для анонимных сообщений
+    # Таблица для хранения сообщений
     cur.execute("""
                 CREATE TABLE IF NOT EXISTS messages
                 (
@@ -54,7 +54,7 @@ def init_db():
 
 
 def save_link(key, owner_id):
-    """Сохраняет уникальную ссылку за владельцем"""
+    """Сохраняет ссылку за владельцем"""
     conn = sqlite3.connect(DB_NAME)
     cur = conn.cursor()
     cur.execute("INSERT OR REPLACE INTO links VALUES (?, ?)", (key, owner_id))
@@ -63,7 +63,7 @@ def save_link(key, owner_id):
 
 
 def get_owner_by_key(key):
-    """Кому принадлежит ссылка"""
+    """Возвращает ID владельца по ключу ссылки"""
     conn = sqlite3.connect(DB_NAME)
     cur = conn.cursor()
     cur.execute("SELECT owner_id FROM links WHERE link_key = ?", (key,))
@@ -73,7 +73,7 @@ def get_owner_by_key(key):
 
 
 def save_message(key, from_user_id, text, reply_to=None):
-    """Сохраняет сообщение"""
+    """Сохраняет анонимное сообщение"""
     conn = sqlite3.connect(DB_NAME)
     cur = conn.cursor()
     cur.execute(
@@ -82,10 +82,11 @@ def save_message(key, from_user_id, text, reply_to=None):
     )
     conn.commit()
     conn.close()
+    return cur.lastrowid
 
 
 def get_last_message_by_user(link_key, from_user_id):
-    """Получить последнее сообщение пользователя"""
+    """Получает последнее сообщение пользователя"""
     conn = sqlite3.connect(DB_NAME)
     cur = conn.cursor()
     cur.execute(
